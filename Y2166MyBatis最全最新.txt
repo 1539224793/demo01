@@ -1,0 +1,1593 @@
+MyBatis入门
+  1.开发idea  熟悉和使用
+    IJ：IntelliJ：智能的    IDEA 联想  智能提示非常强大    JetBrains开发者工具
+	MyEclipse 400-500mb
+	Idea      500-700mb
+	
+	craete from achetype 从 骨架/模板/原型 创建
+	
+	ArtifactID：模块名称
+	
+	Idea Project 能有Artifact 1个   MyEclipse:WorkSpace 工作区  1工作区含有N个项目
+	
+	Maven Home directory maven的主目录
+	
+  2.maven 项目管理利器    依赖
+  3.第一个MyBatis案例
+   学习方法：早睡：听课效率差 12点之前：11:30分 学习  写博客  ，做复习，预习  
+              身体健康：一定要小黄车上学，周末建议大家去爬山，打球。
+			  心灵健康：健康的书籍。励志的 。管理学 IT  
+			  大话设计模式  大话数据结构
+			  
+    4.框架就是一个可以提高开发效率，缩短开发周期，让开发人员专注业务的一个工具。
+	
+  5.Mybatis是apache提供的一个开源项目，原名称是ibatis，2010年迁移到了google 上。2013 年迁移到github上
+  
+	
+  https://github.com/ 提供了大牛的源代码的下载
+  
+  6.MyBatis和Hibernate
+    6.1 MyBatis ORM 手动建表    手写SQL
+	6.2 Hibernate 全自动化的ORM框架 ，自动建表 ，SQL不用书写
+  
+  7.maven 依赖   镜像mirror
+  	 <mirror>
+      <id>mirrorId</id>
+      <mirrorOf>repositoryId</mirrorOf>
+      <name>Human Readable Name for this Mirror.</name>
+      <url>http://maven.aliyun.com/nexus/content/groups/public/</url>
+    </mirror>
+  
+  
+  dependencies：依赖
+  
+  1.引入mybatis的依赖
+  
+  2.关于maven的仓库
+  本地仓库：c:\\users\\happy\\.m2\\repostory
+----------------------------------------------------------------------------------
+2017年9月14日
+1.课程计划
+  2017年9月14日 周四  第一次课   今天
+  2017年9月16日 周六  第二次课
+  2017年9月17日 周日  智能标签和一对多
+  
+   2017年9月19日 周二  一对多，和自关联	
+   2017年9月21日 周四  多对多和二级缓存
+   2017年9月23日 周六  二级缓存和Ajax补充
+   2017年9月24日 周日  Ajax高级和延迟加载
+   
+   2017年9月26日 周二  Spring第一次	
+   2017年9月28日 周四  AOP和单例
+   ----国庆后-------------------------来了之后，返校前1,2天，做一个复习
+   10月4号的票 
+ ----------------------------------
+1.配置idea，导入依赖，把一段标签代码放到pom.xml中
+2.创建maven项目
+  选择maven----->maven webapp---->添加一个键值对，让创建速度变快。----->名称groupid(cn.happy) artifactid (项目名称)-->maven选择(settings.xml 文件夹repository)---->注意事项
+3.在project下创建Module。maven目录结构
+  main 
+    java标记为 蓝色---->源代码目录
+	resources -------->资源目录
+  test
+    java  ------>测试目录
+	resources ---->测试资源目录
+4.MyBatis 
+1.什么是持久化？
+持久化：持久化是    程序数据在    瞬时状态    和   持久状态间    转换的过程 
+序列化：
+
+2.ORM    Object(Java对象 实体)  Relational（二维表） Mapping 对象关系映射
+   
+3.创建mybatis-config.xml文件
+  更改了${名称}
+  通过以下代码去关联数据库的连接信息文件
+   <properties resource="jdbc.properties"/>
+ 
+jdbc.properties文件
+jdbc.driver=com.mysql.jdbc.Driver
+jdbc.url=jdbc:mysql:///y2164
+jdbc.username=root
+jdbc.password=root   
+   
+4.实体类
+   public class Dept {
+    private Integer deptno;
+    private String deptname;
+   //快速封装属性的快捷键是 alt+insert键
+   }
+   
+5.创建接口和小配置，并且在mybatis中关联小配置
+  public interface IDeptDAO {
+    //查询所有  alt+enter alt+回车
+    public List<Dept> findAll();
+  }
+  
+  <?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--根节点
+ namespace:
+-->
+<mapper namespace="cn.happy.dao.IDeptDAO">
+    <select id="findAll"  resultType="cn.happy.entity.Dept">
+        select * from dept
+    </select>
+</mapper>
+   
+     <build>
+        <resources>
+            <resource>
+                <directory>src/main/java</directory>
+                <includes>
+                    <include>**/*.xml</include>
+                </includes>
+            </resource>
+        </resources>
+    </build>  
+   
+ 6.写测试类
+   //1.读取大配置，获取到连接信息
+   String resouce="mybatis-config.xml";
+   //2.为什么要转变成一个InputStream
+    String resouce="mybatis-config.xml";
+        //1.1  将硬盘上一个xml变成一个输入流
+        InputStream is = Resources.getResourceAsStream(resouce);
+        //1.2   使用流对象作为参数创建一个会话工厂
+        SqlSessionFactory factory = new SqlSessionFactoryBuilder().build(is);
+        //1.3  通过会话工厂创建会话对象 session就是程序员和数据库交互的入口
+        SqlSession session = factory.openSession();
+        //1.4  调度selectList方法执行sql，并且获取结果
+        List<Dept> list = session.selectList("findAll");
+        for (Dept dept:list) {
+            System.out.println(dept.getDeptname());
+        }
+        //1.5 关闭会话，释放资源，提高性能
+        session.close();
+ 8.整合日志
+   1.在resources加入名称为log4j.properties物理文件
+   2.在最后一行加入 log4j.logger.cn.happy.dao(自己dao的包的名称)=debug, stdout,file
+------------------------------------------------------------------------------------------
+ 1.三大要素
+   核心配置文件 mybatis-config.xml
+		根节点：configuration
+		 配置文件识别到jdbc.properties
+		 <properties resouce="jdbc.properties">
+		 </properties>
+		 
+		 
+		<environments default="development">
+		  <environment  id="development">
+		     1.事务管理器TransactionManager  JDBC|MANAGED
+			 2.DataSource    POOLED|UNPOOLED|JNDI
+			 3.四大属性 dirver url username password  ${jdbc.xxxx}
+		  </environment>
+		</environments>
+		 1.关联小配置
+		 <mappers>
+		     <mapper resouce="cn/happy/dao/IDeptDAO.xml"/>
+		 </mappers>
+2.小配置
+  根节点：
+  <mapper namespace="cn.happy.dao.IDeptDAO">
+     <select id="findAll" parameterType="传入的参数 可以省略" resultType="类的全名称cn.happy.entity.Dept">
+	   select * from dept
+	 </select>
+  </mapper>
+3.创建测试类
+  读取配置文件
+  String resource="mybatis-config.xml";
+  InputStream is=Resources.getResourceAsStream(resouce);
+  SqlSessionFactory factory=new SqlSessionFactoryBuilder().build(is);
+  SqlSession session=factory.openSession();
+		
+4.getMapper作用
+  IDeptDAO mapper=session.getMapper(xxx.class);
+  List<Dept> list=mapper.findAll();  
+		
+5. 增删改操作必须运行在事务环境中
+	session.commit();
+    不提交事务，影响不了数据表
+
+6.session.selectList("锁定sql")	
+
+--------------------------------------------------
+1.删除部门
+  
+2.别名
+     <typeAliases><!--类型 别名-->
+        <!--<typeAlias type="cn.happy.entity.Dept" alias="Dept"></typeAlias>-->
+        <!--方式二：可以将被扫描包的简单类名作为 别名-->
+        <package name="cn.happy.entity"></package>
+    </typeAliases>
+3.resultMap
+   我们碰到一件事情，DB中的Table中的Field和 Java对象中的属性名称不一致。
+   我们需要手工映射。
+     <resultMap id="myDeptMapper" type="Dept">
+	    <id property="deptno" column="deptno"></id>
+		<result property="deptname2" column="deptname">
+	 </resultMap>
+   
+    <!--1.查询所有resultMap-->
+    <select id="findAll"  resultMap="myDeptMapper">
+        select * from dept
+    </select>
+	
+	高级使用：当底层有多列，但是界面上只需要显示部分列的时候，我们可以在mybatis-config.xml中做一个全局配置。
+	 <settings>
+        <setting name="autoMappingBehavior" value="NONE"/>
+    </settings>
+4.工具类
+
+5.openSession到底做了什么
+   
+  1.openSession是SqlSessionFactory的方法，SqlSessionFactory是一个接口
+  2.SqlSessionFactory的实现类，Ctrl+H 找到DefaultSqlSessionFactory实现类  openSession方法
+  3.在openSession方法中，调度了一个有三个参数的方法 openSessionFromDataSource(ExecutorType ,TransationISOLationLevel level,autoCommit)
+  4.转到了openSessionFromDataSource，5行核心代码
+    将配置文件中的节点变成了程序中的对象进行分析解析 
+   final Environment environment = configuration.getEnvironment();
+   final TransactionFactory transactionFactory = getTransactionFactoryFromEnvironment(environment);
+   tx = transactionFactory.newTransaction(environment.getDataSource(), level, autoCommit);
+   
+   
+   final Executor executor = configuration.newExecutor(tx, execType, autoCommit);
+   return new DefaultSqlSession(configuration, executor);
+   
+  5. public DefaultSqlSession(Configuration configuration, Executor executor) {
+		this.configuration = configuration;
+		this.executor = executor;
+		this.dirty = false; //干净      内存中的数据  ================>数据表中的数据一致。
+    }
+	
+
+  结论：openSession解析核心配置文件的节点，给会话对象的成员变量赋初值。
+ 
+
+6.insert和delete底层是什么
+
+  public int delete(String statement) {
+    return update(statement, null);
+  }
+
+  public int delete(String statement, Object parameter) {
+    return update(statement, parameter);
+  }
+
+  public int insert(String statement) {
+    return insert(statement, null);
+  }
+
+  public int insert(String statement, Object parameter) {
+    return update(statement, parameter);
+  }
+
+
+7.为什么session.commit()能够提交事务
+
+8.session.close()回滚事务
+
+9.模糊查询
+  1.select * from studentinfo where stuname like '%' #{stuname} '%'   ? +++++++++ sql   数据库服务器
+  2.select * from studentinfo where stuname like concat('%',#{stuname},'%')
+  3.select * from studentinfo where stuname like '%${stuname}%'  客户端的查询内容连同%%符号 就被发送到了服务器
+  
+10.多条件查询
+  select * from student
+  where 1=1
+
+11.8个点
+1.删除部门
+  注意点：要传id ，要提交事务
+2.别名
+  <typeAliases>
+     <typeAlias alias="Dept" type="cn.happy.entity.Dept"/>
+	 方式二：可以将被扫描包的简单类名作为
+	 <package name="cn.happy.entity" />
+  </typeAliases>
+  可以在小配置中直接使用我们定制的简单名称进行数据操作
+3.工具类
+  都是静态的
+  static{
+      try{
+	    is=Resources.getResourceAsStream(resouce);
+		factory=new SqlSessionFactoryBuilder().build(is);
+	  }catch(Exception ex){
+	  
+	  }
+  }
+4.resultMap 手工映射
+  1.解决问题：实体类中属性名和数据表字段不一致的问题
+  2.提升：表中字段比较多，我要显示的少，我用他设置我要的属性。后来通过然后的报错教训。最终调整成了
+  在单个映射文件中，autoMapping="false"
+  3.结论：大配置中的settings节点是对全局进行配置的。 properties和<typeAliases>之间
+  
+5.模糊查询
+   1、where stuname like '%' #{stuname} '%'
+   
+   2.where stuname  like  concat('%',#{stuname},'%')
+   
+   3.where stuname  like  '%${stuname}%'会引起SQL注入
+  
+6.多条件查询
+
+7.insert和delete底层是什么
+  底层都是update
+  
+8.openSession到底做了什么
+  1.SqlSessionFactory是一个接口，openSession是他的方法
+  2.DefaultSqlSessionFactory 是SqlSessionFactory实现类，找他的openSession方法
+  3.调度一个有3个参数的方法
+  4.将配置文件中的节点变成了程序中的对象进行分析解析
+    5行code
+	 new DefaultSqlSession()
+  5.对成员变量进行初始化
+
+明天的时候，下午考试一把  Y2第一次考试 笔试，云题库的题
+
+大家自己需要准备一个项目
+
+作业：1.大家周二提交一份自己项目的代码：登录（MyBatis登录）
+      2.代码形成博客++++提交
+	  3.大听写 
+---------------------------------------------------第四次课-------------------------------
+1.添加完成后获取ID
+ <insert id="addDept" parameterType="Dept">
+        insert into Dept(deptName) VALUES (#{deptName})
+        <selectKey keyProperty="deptNo" resultType="int" order="AFTER">
+            select @@IDENTITY
+        </selectKey>
+    </insert>
+	
+ //构建出部门对象
+            //Mysql添加记录的时候，主键值的形成时机，MySQL（自增）  Oracle（序列）
+            Dept dept=new Dept();
+            dept.setDeptName("今天我们讲解Cache");
+            SqlSession session= MyBatisUtil.getSession();
+            System.out.println(dept.getDeptNo()+"add before");
+            //执行添加操作
+            int count = session.insert("addDept", dept);
+            session.commit();
+            System.out.println(dept.getDeptNo()+"add after");
+            session.close();
+  
+2. 多条件查询，索引号
+   05.查询姓名中包含“雨”，并且年龄>20的学生信息
+    public  List<StudentInfo> findStudentsByConditionMutliArgs(String stuName,int stuAge);
+ 
+     <!--多条件查询使用索引-->
+    <select id="findStudentsByConditionMutliArgs" resultType="StudentInfo">
+        select * from  studentinfo where stuname like '%' #{0} '%' and stuAge>#{1}
+    </select>
+	
+3.智能标签
+    //06.智能标签if
+    public List<StudentInfo> findByIf(StudentInfo stu);
+
+    //06.智能标签choose
+    public List<StudentInfo> findByChoose(StudentInfo stu);
+
+    //07.智能标签foreach
+    public  List<StudentInfo> findByForeachArray(int[] ids);
+    //07.智能标签foreach List<Integer>
+    public  List<StudentInfo> findByForeachList(List<Integer> list);
+
+    //07.智能标签foreach List<StudentInfo>
+    public  List<StudentInfo> findByForeachListStudent(List<StudentInfo> list);  
+   
+  -----------------------------------------------------------2017年9月19日08:32:58
+  1.智能标签if
+   <where>
+      <if test="stuno!=null">
+         and stuno=#{stuno}
+      </if>
+   </where>
+
+
+    <where>
+      <choose>
+         <when test="empname!=null">
+	   sql
+	 </when>
+	 <otherwise>
+	 </otherwise>
+      </choose>
+   </where>
+  
+  2.使用索引号进行多条件查询
+    dao:方法
+        public List<Emp> findByCondition(String name,int age);
+
+    映射文件
+       select * from emp where name like '%' #{0} '%' and age>#{1}
+
+      
+  3.智能标签 forach array
+    
+    dao:
+      public  List<Emp> findCondition(int[] ids);
+   
+    映射文件
+      <select id="findCondition" resultType="Emp">
+          select * from emp
+	  <where>
+	     <if test="array.length>0">
+	        empno in 
+	        <foreach open="("  close=")" seperator="," item="myid">
+		  #{myid}
+		</foreach>
+	     </if>
+	  </where>
+      
+      </select>
+   
+----------------------
+sessionJava程序和数据库交互的入口，他的提交可以让事务提交。
+
+1.为什么session.commit()引起事务的提交
+  1.session.commit();  SqlSession接口的
+  2.我们知道的是 SqlSession接口的实现类是DefaultSqlSession
+  3.找到实现类的commit
+    public void commit() {
+	commit(false);
+    }
+  4.
+  public void commit(boolean force) {
+    try {
+      executor.commit(isCommitOrRollbackRequired(force)); //去调度执行器的commit，入参进来的结果为true
+      dirty = false;  //事务结束后，恢复dirty的值
+  }
+  5.
+   public void commit(boolean required) throws SQLException {  required 为真
+    if (required) {
+      transaction.commit();//引起事务提交
+    }
+  }
+
+2.项目的事情
+3.关于一对多的关联(获取某个指定部分下所有员工)，多对一的关联（获取员工的同时获取到员工所在部门）
+4.超市账单管理系统 smbms  super market bill management System 超市账单管理系统
+  4.1 在用户表中植入一条测试数据
+  4.2 entity层
+  4.3 准备依赖
+  4.4 dao
+  4.5 service
+
+ 用户列表
+--------------------------------------------------------------------------------------
+//01.根据部门编号，检索部门名称以及该部门下       所有员工的信息
+    public Dept getEmpsByDeptNo(int deptNo);
+
+ //02.根据部门编号，检索部门名称以及该部门下       所有员工的信息
+    public Dept getEmpsByDeptNoMultiSQL(int deptNo);
+
+ //根据员工的编号，  获取到员工姓名   和所属部门名称
+    public Emp getEmpByEmpNo(int empNo);
+ //根据员工的编号，  获取到员工姓名   和所属部门名称
+    public Emp getEmpByEmpNoMutliSQL(int empNo);
+   
+  freemarker：1.刘城余 
+              2.李俊
+	      3.刘弘历
+
+  POI植入
+  ---------------------------------------------------------
+  1.超市账单登录和列表
+  2.session.commit();引起事务的提交
+    Transaction.commit();
+    关于dirty: factory.openSession(); dirty=false
+    CUD  ： 底层都是update，在try中共第一行code dirty=true
+            直接影响到了，方法判定  dirty||force
+            if(required){
+	      transaction.commit();
+	      dirty=false;
+	    }
+	    
+	   
+
+
+   
+ --------2017年9月21日09:44:27
+ 1.SQL片段
+   <sql id="columns">
+      stuname,stuage
+   </sql>
+   <select>
+      select <include refid="columns"></include> from student
+   </select>
+ 2.一对多   Dad------>Son
+       
+       两种方案：单条SQL 
+
+                   <resultMap id="DadMapper" type="Dad">
+		      <id property="fatherid" column="fatherid"></id>
+		      <collection property="sons" ofType="Son">
+		            <id property="sonid" column="sonid"></id>
+			    <result property="sonname" column="sonname"/>
+		      </collection>
+		   </resultMap>
+                   <select resultMap="DadMapper">
+		     select sonname,fathername from son,dad where son.fatherid=dad.fatherid
+		     and dad.fatherid=#{fatherid}
+		   </select>
+               
+                 多条SQL
+   多对一：两种方案：单条SQL 
+                 多条SQL
+   自关联：无限级菜单
+           DB表结构
+	   Category表名
+	   cid  cname      pid
+	    1    服装       0
+	    2    儿童服装   1
+	    3    儿童男装   2
+
+	    xml 思想递归  
+	    ：使用的是一对多  一个分类关联一个分类集合。
+	 <resultMap id="CategoryMapper" type="Category">
+		<id column="cid" property="cid"></id>
+		<result column="cname" property="cname"></result>
+		<collection property="cates" ofType="Category" select="getChildrenListByPid" column="cid">
+		</collection>
+	    </resultMap>
+	     <!--查询-->
+	    <select id="getChildrenListByPid" resultMap="CategoryMapper">
+		select * from category where pid=#{pid}
+	    </select>
+	dao层：
+	    List<Category> List<List<List<Category>>>
+
+
+   多对多：老师和学生
+
+ 3.添加操作
+----------------------------------------------------------------------
+2017年9月23日
+1.多对多
+  // 查询某个老师教的所有学生集合
+  Teacher
+    ----》List<Student>
+  Student
+2.主加载和关联查询
+  Dept   
+  关联对象的加载时机：
+    1.直接加载   dept和emps 两条sql都执行
+    2.侵入式延迟
+    3.深度延迟
+
+    cglib：
+    <!--cglib-->
+    <dependency>
+      <groupId>cglib</groupId>
+      <artifactId>cglib</artifactId>
+      <version>2.2.2</version>
+    </dependency>
+3.缓存  迅雷下载小电影，
+   缓存文件
+   咱们探讨的缓存在内存中。
+
+   一级缓存：MyBatis中一级默认是内置的，一级缓存不能卸载。
+
+   缓存目的不是为了共享查询结果 。sqlid+select * from dept 
+
+  二级缓存的属性
+  eviction:缓存中保存对象的清理策略
+     FIFO：First in first out 先进先出
+      数据结构：队列
+      栈：先进后出
+     LRU：least Recently used 最近最少使用的对象
+     flushInterval：刷新间隔
+   
+   
+   Setting this to true will cause the local and 2nd level
+caches to be flushed whenever this statement is
+called. Default: false for select statements.
+
+将此设置为 true 将导致本地和第二级别
+无论何时此语句都将刷新缓存
+称为.默认值: 选择语句为 true。
+   
+   
+   作业：1.帮我研究一下，size属性单个文件来说，对所有文件来说。
+
+   
+   
+   
+  ---------------
+  1.MyBatis中二级缓存默认是开启的吗？
+   解析：是的 setttings cacheEnabled true
+         3个条件
+	    1.开启二级缓存
+	    2.<cache/> 小配置
+	    3.标识接口 Serialiazable
+	  
+	  <cache
+	    eviction="FIFO"
+	     flushInterval="60000"
+	     size
+	     readOnly
+	  />
+2.<select id="selectByCondition" resultMap="DeptMapper">
+  select * from detp where deptno=#{deptno}
+
+  <resultMap id="DeptMapper" type="Dept">
+     <collection property="emps" ofType="Emp" select="xxx" column="deptno"></collection>
+  </resultMap>
+   
+ 3.  <where>
+      <if test="stuName!=null">
+        and stuName like 
+      </if>
+   
+ 4. 多条件查询Map
+    1）dao
+       public List<Student> getStudentByMultiCondition(Map<String,Object> map);
+   
+   
+    2) xml中
+      <select id="getStudentByMultiCondition" resultType="Student">
+
+	where stuname like concat('%',#{stuname},'%')
+      </select>
+   
+   
+    3)测试类
+      Map<String,Object> map=new HashMap<String,Object>();
+      map.put("stuname","发哥");
+    
+ 5.模糊查询   3分
+   where stuName like concat('%',#{stuname},'%')
+    where stuName like '%' #{stuname} '%' 
+     where stuName like '%${stuname}%'
+   
+ 6.resultMap的映射级别  2分 
+   NONE  不做映射
+   PARTIAL 部分映射 ，外层属性可以映射，关联对象的属性不做映射 Default
+   FULL  都映射
+
+ 7.resultMap和resultType  7分
+   解析：resultType:只能和领域模型一致，受到限制，进行多个实体属性映射的时候，做不到，需要resultMap的参与 
+
+ 8.工具类  15分
+  public class MyBatisUtil {
+    static String resouce="mybatis-config.xml"; 0分
+    static InputStream is ; 2
+    static SqlSessionFactory factory; 2
+    static {
+        try {
+            is= Resources.getResourceAsStream(resouce);  4
+            factory= new SqlSessionFactoryBuilder().build(is); 4
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    public static SqlSession getSession(){  3分
+        return factory.openSession(true);
+    }
+}
+
+9.流程图 5分
+
+10.小配置 3分
+  <mapper namespace="xxxx.IDeptDAO">
+ 
+11.大配置除了DataSource之外 ，除了 typeAliases三个平级节点
+<settings>  全局参数的设定
+
+<mappers>  关联小配置
+
+<properties>  引入jdbc.properties文件
+
+
+12.除了MyBatis3.2.2.jar  3分
+  3个jar
+   log4j  记录日志
+   mysql 访问数据库
+   cglib  代理对象  
+   asm 字节码
+ 13.开发MyBatis程序的步骤  7分
+ 1.下载jar
+ 2. 配置jar
+ 3. 大配置
+ 4.实体类
+  5.dao层写接口
+  6.映射文件
+  7.单测
+
+14.10分
+
+15.5个框架以及用途  5分
+   1 Mybatis 用途：ORM框架/持久层框架
+   2 Spring    用途：各种业务bean的管理，整合其他框架的一个框架
+   3 Springmvc 用途：流程控制，流程调度 ，request
+   4 Hibernate 用途：ORM框架/持久层框架
+   5 Struts2   请求调度框架   和Springmvc有的一拼
+
+16.框架是什么？ 3分
+  框架是一个半成品，他可以给开发提供基础架构，提升开发效率，缩短开发周期。而且可以方便的去扩展或者集成其他框架。
+
+
+刘涛   51 
+李俊   64 
+苏梦璠  73  NO2
+王云龙 52  
+吴俊熠 20 3遍  
+芮安南 52   
+邵义德  未登记  3遍
+王宇   72  NO3
+赵宇祥 30   
+刘志威 33   
+刘弘历 38  
+陈文杰 87    NO1
+刘城余 50  
+张天赐 32  
+许海峰 48  
+苏菊林 65   
+冯宇轩 20    
+郝叔奥 40   
+周金龙 36   
+李旭   0   5遍
+于帆   43 
+
+-------------------------------------------------------------------------------------------
+1.flushCache="false" 只对二级缓存有效，一级缓存无效
+2.useCache="true"
+   
+   Setting this to true will cause the results of this
+statement to be cached in 2nd level cache. Default:
+true for select statements.
+
+ 3.Mybatis内置的二级缓存。第三方EhCache。
+    1.ehcache-core  1.2.3
+    2.mybatis-ehcache 1.0.0
+    3.slf4j 1.7.25
+    4.slf-log4j 1.7.25
+
+    5.mybatis 3.4.1
+
+   
+
+   4.设置二级缓存的两个位置
+
+     ehcache.xml中default节点和  小配置中cache子节点 
+  
+  
+  1.所有参数的含义
+
+  2、两种设置方式的优先级
+
+  3.如何将内存中的对象保存到硬盘
+
+  4.如何在ehcache.xml中
+ 
+
+ 5.log4j slf4j  slf-log4j
+
+  
+  
+  作业：写项目文档25页 +用户模块+报表导出
+        1.早上8:30 检查项目
+	2.MyBatis 简答题  云题库
+	3.
+        
+  
+  Java能不死的原因：就是因为他有一个核心非常强大的技术框架支持。
+  Spring
+        IOC Inverse Of Control  控制反转   IFly fly;  IRun run;
+	AOP Aspect Oritend Programming 面向切面编程
+	OOP:Object Oritend Programming  面向对象编程  四大核心 抽象  封装  继承 多态   code 30K  20%
+	OOD:Object Oritend Designing  面向对象设计  工程师  架构师 30K----60K
+	OOA:Object Oritend Analesis   面向对象分析  
+
+		对象之间的关系 （面向对象分析 OOA、面向对象设计 OOD 、面向对象编程 OOP）
+		分析      --------   设计  ------     编程
+		是                泛化           extends  
+		能                实现           接口 implements 
+		有                关联           成员变量 
+		用                依赖           方法中局部变量 
+
+
+     程序员
+     程序媛
+     程序猿
+
+     软件开发工程师
+  
+  1.Spring入门案例
+    1.找依赖
+       spring-beans.4.2.0.jar 
+			附带了core核心 和commons-logging
+
+       spring-context.4.2.0.jar 
+
+		       spring-expression.4.2.0.jar 
+
+		       spring-aoplple.4.2.0.jar 
+
+		       spring-aop.4.2.0.jar 
+    2.HappyService类型
+ 
+    3 beans 根节点下有N个bean节点
+      <bean id="service" class="类型的全名">
+
+    4.容器
+	ApplicationContext ctx=new  ClassPathXmlApplicationContext("applictionContext.xml");
+        HappyService service=  (HappyService)ctx.getBean("service");
+     
+  2.容器：能存放多个物品的一个物体，能提供各种功能。宝盒里各种需求
+    Spring容器：相当于一个大水桶：各种bean就是水，水脱离了水桶，没有意义了。
+  
+  3.IOC
+
+     理解一：组件对象的控制权从代码本身转移到外部容器（spring容器）
+    
+     理解二：就是xml中配置bean节点
+
+
+   DI：Dependency Injection  依赖 注入   给对象注入属性值
+
+   关系：它们是spring核心思想的不同方面的描述。站在不同维度对同一个概念或者事务的解释?(重点)
+
+
+  4.打印机
+    三种打印机：
+      针式打印机  ：Epson 590K
+      喷墨打印机  ：简历
+        墨盒：黑白
+	      彩色
+
+	纸张 ：A4
+	       B5
+
+      激光打印机  ：
+
+
+---------------------------------------------------------------
+2017年10月5日08:38:14
+1.Ajax技术合成  异步的JavaScript and  xml  css 资源
+  
+2.异步请求和局部刷新。
+  同步请求：等待第一个请求响应数据回发回来后，再发送第二次请求。
+  $.ajax(是否异步)
+
+3.Ajax怎么运作？ 一把枪   谁？js驱动这把枪
+  原生态Ajax核心对象：
+      判定当前的浏览器引擎有没有哪个对象？ 能力检查 （情况1:IE  和非IE  chrome和FireFox）
+      1.构建核心对象   XmlHttpRequest  xhr;
+
+
+      2.设置他的属性和方法
+        xhr.open("post","/FirstServlet",true);
+	xhr.onreadystatechange=funtion(){
+	    if(xhr.readyState==4&&xhr.status==200){
+	    }
+	
+	};
+        
+        你要想发送Post请求，必须得有Content-Type
+	xhr.setRequestHeader("Content-Type","application/x-www-form-urlencoded");
+	xhr.send(get:null/post:data);
+
+4.使用jQuery实现Ajax
+    function newAjax() {
+            $.ajax({
+                url:"/FirstServlet",
+                type:"POST",
+                data:{"uname":$("[name=uname]").val()},
+                async:true,
+                success:function (data) {
+                    $("#msg").html(data);
+                }
+            });
+        }
+
+5.认识JSON
+  是一种数据传输格式：  
+  JavaScript  Object  Notation  Js对象标记  XML Extendsible  Makeup Language  可扩展性标记语言   
+  HTML：Hyper  Text  Markup Language 超文本标记语言
+   var data={"name":"微冷的雨","age":20,"address":"河南安阳"};
+
+   var data=[{"name":"微冷的雨","age":20,"address":"北京上地"},
+                {"name":"微热的翔","age":22,"address":"河南郑州"}]
+
+   var userArray = [ {
+                "id" : 2,
+                "name" : "admin",
+                "pwd" : "123"
+            }, {
+                "id" : 3,
+                "name" : "詹姆斯",
+                "pwd" : "11111"
+            }, {
+                "id" : 4,
+                "name" : "梅西",
+                "pwd" : "6666"
+            } ];
+
+    var $table = $("<table border='1'></table>")
+                //在table内部追加一行  tr
+                .append("<tr><td>ID</td><td>用户名</td><td>密码</td></tr>");
+                $.each(userArray,function(i,dom) {
+                    $table.append("<tr><td>" + dom.id + "</td><td>"
+                        + dom.name + "</td><td>"
+                        + dom.pwd + "</td></tr>");
+                });
+
+
+
+   $("#objectArrayDiv").append($table);
+6.$.get()
+		       $.get('/FirstServlet',{"uname":$("[name=uname]").val()},function (data) {
+			   $("#msg").html(data);
+		       });
+
+
+            /* $.get('/FirstServlet',{"uname":$("[name=uname]").val()},function (data) {
+                   $("#msg").html(data);
+               });*/
+                //post请求
+             /*  $.post('/FirstServlet',{"uname":$("[name=uname]").val()},function (data) {
+                   $("#msg").html(data);
+               });*/
+
+             //getJSON方法
+               $.get('/FirstServlet',{"uname":$("[name=uname]").val()},function (data) {
+                   alert(typeof data);
+                   $("#msg").html(data);
+               });
+
+	      $("#msg").load('/FirstServlet',{"uname":$("[name=uname]").val()});
+
+             设置了dataType；“json”  服务器端返回的数据格式是json对象，不是json串。
+
+7.$( selector ) 选择器
+  $("#msg")：Jquery对象
+  $(dom) dom转jquery对象的方案
+  $("<div></div>") 内存中构建一个节点
+
+刘青云
+古天乐
+彭于晏
+吴京
+
+危城
+
+load
+
+8.表单元素
+  input  name  value
+  select----option
+  textarea
+  serialize():将符合条件的表单元素拼接成特定的格式
+  $.param($("#form1").serializeArray());
+
+9.FastJSON API  生成json数据
+  老婆和 老婆饼  老婆可以吃老婆饼
+  fastjson和 json  fastjson是一个工具，可以生成json
+  
+
+[
+{"bookName":"平凡的世界","bookPrice":60},
+{"bookName":"活着","bookPrice":44},
+{"bookName":"预约死亡","bookPrice":34}
+] 
+
+
+1.AOP概念：
+   AOP面向切面编程，横切关注点
+2.AOP专业术语
+切点：主业务类中能匹配到切点表达式的方法
+切面：通知和切点的集合  交叉业务类称为切面
+连接点：主业务类中的方法
+通知：增强类中的方法
+织入：动态的过程，将通知和切点绑定的过程称为织入
+
+2.AOP第一个例子
+
+
+3.单例模式
+Spring默认生成的bean都是单例的，如何让他变成多例？
+ <bean scope="prototype(多例)/singleton(单例)">
+
+4.基于xml的DI（Dependency）
+
+
+10.bean的id和name属性
+    当bean中含有特殊字符时，就需要使用name属性了
+11.基于xml的DI（Dependency Injection）
+     注入类型：
+       1.1设值注入（set方法注入）：本质上是调用了Bean的setXXX()进行值的注入
+
+       普通属性
+          <property name="name" value="微冷的雨"></property>
+          <property name="age" value="18"></property>
+
+       域属性（JavaBean属性）
+       <property name="myCar" ref="mmCar"></property>
+12.  *构造注入：
+         <bean id="stu2" class="cn.happy.day01.entity.Student">
+           <constructor-arg index="0" value="微冷的雨"></constructor-arg>  
+           <constructor-arg index="1" value="18"></constructor-arg>  
+           <constructor-arg index="2"  ref="mmCar"></constructor-arg>  
+        </bean>
+13.命名空间p注入 （2个步骤）
+*********************************************************
+      1.1 使用前要先要在Spring配置文件中引入p命名空间
+       xmlns:p="http://www.springframework.org/schema/p"
+
+      1.2.本质上还是set方法注入	  
+      <!--02.p命名空间注入 -->
+      <bean id="stu3" class="cn.happy.day01.entity.Student" 
+      p:name="国庆放假买手机" p:age="18" p:myCar-ref="mmCar">
+14.*集合属性注入
+		数组array
+		<bean id="array" class="cn.happy.spring04collection.MyCollection">
+       <property name="array">
+          <array>
+             <value>zly</value> 
+             <value>lxl</value>
+          </array>
+       </property>
+    </bean>	
+     
+
+       List
+	   配置文件
+	     <bean id="listCollection" class="cn.day00di_xml.BeanCollection">
+        <property name="list">
+            <list>
+                <ref bean="car"></ref>
+                <ref bean="car2"></ref>
+            </list>
+        </property>
+       </bean>
+       Set
+       Map
+       <!--集合属性注入之           Map-->
+      <bean id="mapCollection" class="cn.day00di_xml.BeanCollection">
+          <property name="map">
+              <map>
+                  <entry key="Green">
+                      <ref bean="car2"></ref>
+                  </entry>
+                  <entry key="Pink">
+                      <ref bean="car"></ref>
+                  </entry>
+              </map>
+          </property>
+      </bean>
+
+	   <!--  <bean id="collection" class="cn.happy.spring04collection.MyCollection">
+       <property name="map">
+            <map>
+              map中的一项是一个entry
+              <entry key="003">
+                <value>2016我的毕业季</value>
+              </entry>
+              <entry key="001">
+                <value>2016我的就业季</value>
+              </entry>
+               <entry key="002">
+                <value>2016我的工作季</value>
+              </entry>
+
+            </map>
+       </property>
+    </bean> -->
+	  
+     <!-- properties -->
+    <bean id="properties" class="cn.happy.spring04collection.MyCollection">
+       <property name="properties">
+          <props>
+            <prop key="001">001</prop>
+            <prop key="002">002</prop>
+          </props>
+       </property>
+    </bean>
+	  
+http://www.cnblogs.com/amosli/p/3430573.html
+
+---------------2017年10月7日
+1.IOC和DI
+  IOC侧重的是思想 ，DI实现
+  IOC侧重构造对象：通过容器  DI对属性值进行注入  （普通属性和域属性的注入）
+2.DI的深入，打印机的例子
+3.AOP：Aspect Oriented Programming 面向切面编程  增强类
+  OOP  面向对象编程
+  OOD
+  OOA
+ 
+4.AOP  
+  前置增强  MethodBeforeAdvice
+
+  引入一个节点
+  aspectjweaver
+     <!-- https://mvnrepository.com/artifact/aspectj/aspectjweaver -->
+        <dependency>
+            <groupId>aspectj</groupId>
+            <artifactId>aspectjweaver</artifactId>
+            <version>1.5.3</version>
+        </dependency>
+
+  xsd约束
+  aop
+ 第一个案例
+
+    <!--dao层的配置-->
+    <bean id="someDAO" class="cn.happy.day03aop.dao.SomeDAOImpl"></bean>
+
+    <!--service层的配置-->
+    <bean id="someService" class="cn.happy.day03aop.service.SomeServiceImpl">
+        <property name="dao" ref="someDAO"></property>
+    </bean>
+
+    <!--增强：通知Advice-->
+    <bean id="beforeAdvice" class="cn.happy.day03aop.aop.MyBeforeAdvice"></bean>
+
+    切面
+    <aop:config>
+       <aop:pointcut id="mypointcut" expression="execution(public void doSome())">
+       <aop:advisor advice-ref="beforeAdvice" pointcut-ref="mypointcut">
+       </aop:advisor>
+    </aop:config>
+
+3.切点表达式
+    * *..UserServiceImpl.*(..)
+     void  全名称 cn.cn.cn.cn.cn.UserServiceImpl.*(..)
+     String
+     int 
+
+execution(【modifiers-pattern?】 访问修饰符
+             ret-type-pattern   返回值类型
+             【declaring-type-pattern?】 全限定性类名
+             name-pattern(param-pattern)  方法名(参数名)  包名.类型名.方法名
+             【throws-pattern?】)  抛出异常类型
+   public void doLog(String log){
+
+   }
+   方法签名
+     切入点表达式要匹配的对象就是目标方法的方法名。所以，execution表达式中明显就是方法的签名。
+     注意：表达式中加[]的部分表示可省略部分，各部分间用空格分开。在其中可以使用以下符号：
+      符号              意义
+       *                 0至多个任意字符
+       ..                用在方法参数中，表示任意多个参数
+                         用在包名后，表示当前包及其子包路径
+        +                用在类名后，表示当前类及其子类
+                         用在接口后，表示当前接口及其实现类
+      案例：
+        execution(public * *(..))  指定切入点为：任意公共方法
+        execution(* set*(..))   指定切入点为：任何一个以"set"开始的方法
+
+4.后置增强 接口AfterReturningAdvice
+
+
+5.基于XMLDI
+   1）三种注入方式
+
+     set方法注入
+
+
+     构造注入
+       1.给实体类添加构造
+       2.通过constructor-arg设置的参数的值
+
+       结论：如果构造注入和set方法注入应用到同一个属性上，那么优先级高的是set方法注入
+
+     p命名空间注入
+      1.引入命名空间
+      2.不再使用bean的子节点，提炼成属性 p:name p:age  
+
+   2)集合注入 array list set map properties
+
+
+   3）Spring管理的bean是单例
+      单例？what you think when i talked singleton?
+      解析:1.构造私有
+           2.私有的静态的变量，变量的类型就是当前类的类型
+	   3.提供一个静态方法
+      单例：一个 类在内存中只有一个对象
+      Java中：懒汉和恶汉
+
+    和Struts2整合  bean多例的
+    Springmvc  整合  bean单例的
+
+
+serlvet
+
+
+   4)BeanFactory ：第一次使用容器中的bean的时候，创建对象
+     ApplicationContext 继承 HierarchicalBeanFactory
+     HierarchicalBeanFactory 继承 BeanFactory 
+
+
+   5）域属性自动注入autowire 
+      byName
+      byType：
+     Spring IoC容器可以自动装配（autowire）相互协作bean之间的关联关系。
+     因此，如果可能的话，可以自动让Spring通过检查BeanFactory中的内容，
+     来替我们指定bean的协作者（其他被依赖的bean）。
+     由于autowire可以针对单个bean进行设置，因此可以让有些bean使用autowire，
+     有些bean不采用。autowire的方便之处在减少或者消除属性或构造器参数的设置，
+     这样可以给我们的配置文件减减肥！[2] 在xml配置文件中，autowire一共有五种类型，
+     可以在<bean/>元素中使用autowire属性指定:
+1.复习
+  1.AOP的第一个例子
+       1.增强：前置和后置
+             MethodBeforeAdvice    AfterReturningAdvice   接口
+	       before()              afterRetruing()
+       2.增强也需要再xml中进行配置
+          <bean id="beforeAdvice" class="MyBeforeAdvice">
+	  <bean id="afterAdvice" class="MyAfterAdvice">
+       3.AOP操作在配置文件中
+         1.copy一个aop节点
+	 2.<aop:config>
+	   <aop:pointcut id="mypointcut" expression="execution(* *..service.*.*(..))"> </aop:pointcut>
+	   <aop:advisor pointcut-ref="mypointcut"  advice-ref="beforeAdvice">
+	   <aop:advisor pointcut-ref="mypointcut"  advice-ref="afterAdvice">
+
+  2.注入方式
+     1.设值注入
+
+     2.构造注入
+       条件1：带参构造  无参构造
+       条件2：
+       <bean id="stu">
+           <constructor-arg index="0" value="张三">
+       </bean>
+  3.p命名空间注入
+     1.copy一个p
+     2.<bean id="stu" p:name="张三" p:car-ref="car">
+
+  3.集合属性注入
+   array  set list map properties  k=v
+  4.BeanFactory  延迟咱们bean初始化 ，使用的时候再做初始化和ApplicationConext.
+  ApplicationConext 是BeanFactory的孙子接口 
+  ApplicationConext 容器创建，bean就做初始化
+
+  5.Servlet的初始化时机
+    解析：看情况：1.看xml中 load-on-startup 0或者正整数  容器启动，bean已经初始化
+                  2.没有的话或者为负数，用户第一次访问Servlet
+  6.Spring中Bean作用域 scope="singleton/prototype"
+
+  7.域属性自动注入
+     byName:要求：配置文件中可以有多个对象，但是默认只自动装配和属性同名的bean的id对象
+
+     byType:要求：相容类型的对象只能有一个
+  
+
+2.AOP概念
+  1.面向切面编程 Aspact Oriented Programming
+  2.7个专业术语
+    增强处理/通知（Advice）
+       增强类中的方法
+    切入点（Pointcut）
+         符合切点表达式的方法才能称为切入点
+    连接点（Join Point）
+         目标对象中的所有方法都是连接点
+    切面（Aspect）
+       增强类
+    目标对象（Target object）
+       等待被增强的对象
+    AOP代理（AOP proxy）
+        代理对象，内存中创建的。
+    织入（Weaving）
+      将切面和目标对象进行绑定的过程
+
+
+
+3.注解的DI和动态代理
+ 1.what is annotation?
+   有人说:@Override  在Java中，有小鼠标的就是注解
+
+ 2.what annotation we has used?
+   @Override 标识子类中的方法一定来源于父类
+   @Test  单测方法
+   @After 在单测后执行
+   @Before 前执行
+   @WebServlet(name="" urlpatterns="{"/"}") 对外公开访问地址
+   @SuppressWarnings() 取消警告
+  
+ 3.what is annotation's basic layer meaning,OK？
+   解析：注解的本质是接口
+   自定义注解
+ 4.what is annotation's function ? 
+  解析：注解是给谁看的，Java编译器  Java编译器会获取到注解的类型元数据。对该类或者方法进行特殊的照顾处理
+
+
+6.基于注解DI
+  component-scan 组件扫描
+  base-package="cn.happy.day07annotationdi" 扫描本身和子包
+  base-package="cn.happy.day07annotationdi.*" 只扫描子包
+  
+@Component  标识一个类是被Spring容器管理的一个bean
+
+分层的情况
+@Repository dao
+@Service    service
+@Controller 控制层
+
+    
+
+
+@Value  给类的普通属性赋值
+@Resource 给类的域属性赋值
+@AutoWired 给类的域属性赋值
+
+金牌结论：如果直接在域属性上写Resource。没有指定名称，先按照byName尝试装配，如果容器中
+，没有和成员变量同名的bean，那么继续使用byType进行装配。如果byType
+检测到相容的类型有多个，就报错:expected single matching,but found 2;
+
+7.代理
+两类：动态代理和静态代理
+
+静态代理:代理模式
+ 代理：
+  1.代理
+    招生的速度加快了
+  2.代理
+    房屋中介
+  3.对原有对象的行为进行增强
+  
+ 
+ 
+ 抽象主题：Subject：接口
+ 目标对象（原始对象）：RealSubject（要增强的对象） implements 
+ 代理对象：Proxy(植入目标对象) 实现了接口
+           before code block
+           business  xxx.invoke()
+           after code block
+
+ 动态代理 AOP底层实现：有接口自动应用的就是JDK动态代理
+     1)JDK  在运行时运行时注入
+          本质：在内存中构建出接口的实现类
+          特点：被代理对象，必须有接口
+
+
+        Proxy.newProxyInstance(ClassLoader loader,
+                                          Class<?>[] interfaces,
+                                          InvocationHandler h)
+
+        InvocationHandler调度处理器
+        public interface InvocationHandler {
+
+
+        }
+
+        ------------------------Code--------------
+        final IUSerDao dao=new UserDaoImpl();
+        import java.lang.reflect.Proxy;
+        InvocationHandler ih=new InvocationHandler(){
+          public Object invoke(Object proxy,Method method,Object[] args){
+
+              ==================前置===================
+             Object result=method.invoke(dao,args);
+              ==================后置===================
+
+            return result;
+          }
+          
+        };
+
+        IUSerDao proxy=(IUSerDao)Proxy.newProxyInstance(ClassLoader,Interfaces,InvocationHanlder){
+
+        };
+        proxy.add();
+    
+     2)Cglib  底层，注入，编译期已经注入了
+           本质：在内存中生成被代理类（目标类）的【子类】
+           特点：可以在没有接口的情况下代理
+           对于不使用接口的业务类，无法使用JDK动态代理，cglib采用非常底层的字节码技术，
+	   可以为一个类创建子类
+      Enhancer xxx=yyy;
+      UserDaoImpl proxy=(UserDaoImpl)enhancer.create();
+      proxy.add();
+
+
+1.OA系统 演示效果  
+
+  用户在网站中的行为记录，用日志记录到数据库中。
+
+2.实现步骤和Annotation组合
+
+动态代理
+JDK动态代理：时机：运行时
+             特点：代理的目标对象必须有接口
+             实质：内存中构建了出了接口的实现类
+final SomeServiceImpl service=new SomeServiceImpl();
+
+ISomeService prxoy=(ISomeService)Proxy
+       .newProxyInstance(service.getClass().getClassLoader(),service.getClass().getInterfaces(),new InvocationHandler(){
+           public Object invoke(Object o,Method method,Objecdt[] args){
+		 syso("before======");
+	       Object result=  method.invoke(service,args);
+		return result;
+	   }
+          
+       });
+
+proxy.doSome();
+
+
+
+ClassLoader loader,  类加载器（孙卫琴） 如何获取到类加载器？
+Class<?>[] interfaces,
+InvocationHandler h  调度处理器
+
+CGLIB动态代理： 编译的时候
+      特点：再一个类型没有接口的情况下进行代理
+             实质：内存中构建了出了目标类型的子类
+             对于不使用接口的业务类，无法使用JDK动态代理，cglib采用非常底层的字节码技术，
+	     可以为一个类创建子类
+CGLIB动态代理  无接口代理 编译已经增强
+final SomeServiceImpl service=new  SomeServiceImpl();
+Enhancer enhancer=new Enhancer();
+enhancer.setSuperClass(service.getClass());
+enhancer.setCallBack(new MethodInterceptor(){
+
+   public Object intercept(Object o,Method method,Object[] objects,MethodProxy methodProxy){
+	sout("before=========");
+	Object resullt=methodProxy.invoke(service,objects);
+        return result;
+   }
+});
+
+SomeServiceImpl proxy=(SomeServiceImpl)enhancer.create();
+proxy.doSome();
+
+1.Spring AOP 经典AOP AspectAOP
+2.JDBCTemplate整合到SPring
+3.Spring整合事务
+4.SSM xml版整合 和注解整合
+-----------------------------Spring   IOC   AOP---------------
+
+
+
+经典AOP
+  代理工厂Bean  是一个类 ProxyFactoryBean
+	  前置增强 MethodBeforeAdvice
+	  后置增强 AfterReturingAdvice 
+	  环绕增强 MethodInterceptor  熟悉
+	  异常增强 ThrowsAdvice  记录日志
+     接口中没有方法，但是得实现afterThrows
+     public void afterThrows( [Method method,] [Object args,] [Object target,] Throwable throwable );
+
+2.顾问（Advisor）
+   通知Advice是Spring提供的一种切面(Aspect)。但其功能过于简单，只能
+将切面织入到目标类的所有目标方法中，无法完成将切面织入到指定目标方法中。
+
+顾问Advisor是Spring提供的另一种切面。其可以完成更为复杂的切面织入功能，能选择性的增强切面中的部分方法。
+PointcutAdvisor是顾问的一种，可以指定具体的切入点。顾问将通知进行了包装，
+会根据不同的通知类型，在不同的时间点，将切面织入到不同的切入点。
+PointcutAdvisor接口有两个较为常用的实现类：
+ *：NameMatchMethodPointcutAdvisor 名称匹配方法切入点顾问
+ *: RegexpMethodPointcutAdvisor 正则表达式匹配方法切入点顾问
+      <property name="pattern" value=".*do.*"></property>  表示方法全名（包名，接口名，方法名）
+    运算符       名称      意义
+     .           点号       表示任意单个字符
+     +           加号       表示前一个字符出现一次或者多次
+     *           星号       表示前一个字符出现0次或者多次
+
+  名称匹配方法切入点顾问  NameMatchMethodPointcutAdvisor
+   <!-- 03.配置顾问   advisor 包装  advice-->
+    <bean id="beforeAdvisor" class="org.springframework.aop.support.NameMatchMethodPointcutAdvisor">
+      <property name="advice" ref="beforeAdvice"></property>
+      <property name="mappedNames" value="do*"></property>
+    </bean>
+   
+  正则匹配方法切入点顾问  RegexpMethodPointcutAdvisor
+正则两种元字符
+ 分类1:匹配用的
+      \d 0-9
+      \w 0-9 A-Z a0-z 汉字 _
+       .  除了换行外的所有字符
+       ^正则的开始  
+       $正则的结束
+
+
+ 分类2 限定用的
+       * 0到多次
+       +  1到多次
+       ？ 0到1次
+       {m} 重复m次
+       {m,} 重复最少m次
+       {m,n} 重复最少m次，最多n次
+   
+  yymqqc@126.com
+  \w+@\w+\.\w+
+  
+3.两种自动代理实现
+ =====默认Advisor自动代理生成器    
+ 注意：切面只能是顾问，对所有的对象都增强
+ DefaultAdvisorAutoProxyCreator
+     <bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"></bean>
+
+ =====BeanName自动代理生成器
+ BeanNameAutoProxyCreator
+    <bean class="org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator">
+      <property name="beanNames" value="someService"></property>
+      <property name="interceptorNames" value="beforeAdvice"></property>
+    </bean>
+
+4.AspectJ
+   AspectJ注解
+   AspectJ xml实现
+  AspectJ是一个面向切面的框架
+  传统AOP:Spring集成AspectJ
+  
+  无缝面向切面扩展的框架，横切关注点
+  AspectJ（也就是AOP）的动机是发现那些使用传统的编程方法无法很好处理的问题。
+  考虑一个要在某些应用中实施安全策略的问题。安全性是贯穿于系统所有模块间的问题，
+  每个模块都需要应用安全机制才能保证整个系统的安全性，
+  很明显这里的安全策略的实施问题就是一个横切关注点，
+  使用传统的编程解决此问题非常的困难而且容易产生差错，
+  这就正是AOP发挥作用的时候了。@AspectJ 使用了Java5 的注解，
+  可以将切面声明为普通的Java类（POJO）。
+  
+  
+
+  使用AspectJ 基于 注解的AOP
+  接口
+  实现类
+  增强类 不去实现任何接口
+  
+  @Aspect
+  public class MyAspect  {
+      //前置增强
+      @Before("execution(* *..UserService.*(..))")
+      public void myBefore(){
+          System.out.println("======之前");
+      }
+  }
+
+  xml配置文件中
+  <aop:aspectj-autoproxy>
+
+ AspectJ基于XML的AOP实现  （开发常用）
+ 4.1前置增强
+  <aop:config>
+      <aop:pointcut expression="execution(* *..SomeServiceImpl.doLog(..))" id="beforePointcut"/>
+      <aop:aspect ref="myAspect">
+          <aop:before method="myBefore(org.aspectj.lang.JoinPoint)" pointcut-ref="beforePointcut"/>
+      </aop:aspect>
+   </aop:config>
+
+
+
+
+假期作业
+1.预习  AspectJ 注解版   AspectJxml版
+        JDBCTemplate
+
+
+2.复习 9篇项目可以
+       100页Spring 实验手册
+3.试卷
+
+
+4.简历
+
+
+5.面试题
+-----------------------------------2017年10月19日11:41:56
+1.AutomaticallyProfile 自动化引擎   MyBatis和DB 沟通的引擎   博客
+2.模板引擎  FreeMarker ，机密系统：jsp
+3.Spring Java老大  JavaMail  Quartz任务调度   大数据中间件
+4.Aspectj 他是AOP框架，扩展了Java语言
+5.NIO  IO  
+6.修改机试题，将jsp改成freeMarker
+7.easyUI 李俊
+
+
+
+
+
+
+
+
+
+
+
+
+
+
